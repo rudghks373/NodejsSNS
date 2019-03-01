@@ -20,69 +20,11 @@ app.use(express.static(__dirname+"/public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
-// DB schema
-var contactSchema = mongoose.Schema({
-  name:{type:String, required:true, unique:true},
-  email:{type:String},
-  phone:{type:String}
-});
-var Contact = mongoose.model("contact", contactSchema);
 
 // Routes
-// Home
-app.get("/", function(req, res){
-  res.redirect("/contacts");
-});
-// Contacts - Index
-app.get("/contacts", function(req, res){
-  Contact.find({}, function(err, contacts){
-    if(err) return res.json(err);
-    res.render("contacts/index", {contacts:contacts});
-  });
-});
-// Contacts - New
-app.get("/contacts/new", function(req, res){
-  res.render("contacts/new");
-});
-// Contacts - create
-app.post("/contacts", function(req, res){
-  Contact.create(req.body, function(err, contact){
-    if(err) return res.json(err);
-    res.redirect("/contacts");
-  });
-});
+app.use("/", require("./routes/home")); //1
+app.use("/contacts", require("./routes/contacts")); //2
 
-// Contacts - show // 3
-app.get("/contacts/:id", function(req, res){
-  Contact.findOne({_id:req.params.id}, function(err, contact){
-   if(err) return res.json(err);
-   res.render("contacts/show", {contact:contact});
-  });
- });
- 
- // Contacts - edit // 4 
- app.get("/contacts/:id/edit", function(req, res){
-  Contact.findOne({_id:req.params.id}, function(err, contact){
-   if(err) return res.json(err);
-   res.render("contacts/edit", {contact:contact});
-  });
- });
-
- // Contacts - update // 5 
- app.put("/contacts/:id", function(req, res){
-  Contact.findOneAndUpdate({_id:req.params.id}, req.body, function(err, contact){
-   if(err) return res.json(err);
-   res.redirect("/contacts/"+req.params.id);
-  });
- });
-
- // Contacts - destroy // 6
- app.delete("/contacts/:id", function(req, res){
-  Contact.remove({_id:req.params.id}, function(err, contact){
-   if(err) return res.json(err);
-   res.redirect("/contacts");
-  });
- });
 // Port setting
 var port = 3000;
 app.listen(port, function(){
